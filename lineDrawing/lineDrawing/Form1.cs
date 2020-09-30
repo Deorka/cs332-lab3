@@ -80,6 +80,7 @@ namespace lineDrawing
         }
         public void WuLine(int x0, int y0, int x1, int y1)
         {
+            // Идентичные преобразования
             var steep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
             if (steep)
             {
@@ -92,7 +93,7 @@ namespace lineDrawing
                 (y0, y1) = (y1, y0);
             }
 
-            DrawPoint(steep, x0, y0, 1); // Эта функция автоматом меняет координаты местами в зависимости от переменной steep
+            DrawPoint(steep, x0, y0, 1);
             DrawPoint(steep, x1, y1, 1); // Последний аргумент — интенсивность в долях единицы
             float dx = x1 - x0;
             float dy = y1 - y0;

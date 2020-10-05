@@ -33,54 +33,75 @@ namespace lineDrawing
 
         public void Bresenham_line_algorithm(int x0, int y0, int x1, int y1)
         {
-            var bad = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
-            // модифицируем координаты точек, чтобы не было проблем с вычислениями
-            // слишком большой угол наклона
-            if (bad)
-            {
-                (x0, y0) = (y0, x0);
-                (x1, y1) = (y1, x1);
-            }
-            // линия растёт не слева направо
             if (x0 > x1)
             {
                 (x0, x1) = (x1, x0);
                 (y0, y1) = (y1, y0);
             }
+            int dy = y1 - y0;
+            int dx = x1 - x0;
+            int xi = x0;
+            int yi = y0;
+            int di = 2 * dy - dx;
+            int step = 1;
+            double grad = Math.Abs((double)dy / dx);
 
-            int dx = Math.Abs(x1 - x0);
-            int dy = Math.Abs(y1 - y0);
-            // вертикальное расстояние между текущим y и точным y для текущего x, с домножением на dx
-            // чтобы каждый шаг ошибка изменялась на dy
-            int error = dx / 2;
-
-            // направление роста y
-            int ystep = (y0 < y1) ? 1 : -1;
-            int y = y0;
-            for (int x = x0; x <= x1; x++)
+            // for a line with gradient <= 1
+            if (dx == 0 || grad <= 1)
             {
-                if (bad)
+                // если убывает
+                if ((double)dy / dx < 0)
                 {
-                    (x, y) = (y, x);
+                    step = -1;
+                    dy = -dy;
                 }
-                // возвращаем координаты на свои места, чтобы нарисовать отрезок корректно
-                bmp.SetPixel(x, y, color);
-                if (bad)
+                for (int x = x0; x < x1; x++)
                 {
-                    (x, y) = (y, x);
+                    bmp.SetPixel(x, yi, color);
+                    // если не нужно поднимать y
+                    if (di < 0)
+                    {
+                        di += 2 * dy;
+                    }
+                    // если нужно поднимать y
+                    else if (di >= 0)
+                    {
+                        yi += step;
+                        di += 2 * (dy - dx);
+                    }
                 }
-                // когда ошибка пересекает рубеж, новый пиксел сдвигается выше
-                error -= dy;
-                if (error < 0)
+            }
+            // for a line with gradient > 1
+            else if (grad > 1)
+            {
+                // если убывает
+                if ((double)dy / dx < 0)
                 {
-                    y += ystep;
-                    error += dx;
+                    step = -1;
+                    dy = -dy;
+                    // так как проходим по y
+                    xi = x1;
+                    (y0, y1) = (y1, y0);
+                }
+                for (int y = y0; y < y1; y++)
+                {
+                    // если не нужно поднимать x
+                    bmp.SetPixel(xi, y, color);
+                    if (di < 0)
+                    {
+                        di += 2 * dx;
+                    }
+                    // если нужно поднимать x
+                    else if (di >= 0)
+                    {
+                        xi += step;
+                        di += 2 * (dx - dy);
+                    }
                 }
             }
         }
         public void WuLine(int x0, int y0, int x1, int y1)
         {
-            // Идентичные преобразования
             var steep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
             if (steep)
             {
